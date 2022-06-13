@@ -1,0 +1,344 @@
+---
+title: "Análisis de datos de COVID-19 en Costa Rica"
+author: "Andrea Padilla"
+date: '2022-05-11'
+output: 
+  html_document:
+    toc: true
+    theme: readable
+    toc_depth: 5
+    toc_float:
+      collapsed: false
+      smooth_scroll:  false
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Presentación 
+Este documento presenta gráficos generados a partir de los datos de COVID-19 en Costa Rica compartidos por el Ministerio de Salud en [https://geovision.uned.ac.cr/oges/](https://geovision.uned.ac.cr/oges/ ).
+
+## Entradas
+```{r carga-datos}
+covid <- read.csv(file = "05_10_22_CSV_GENERAL.csv", sep = ";")
+```
+
+#### Datos generales de casos
+covid <- read.csv("05_03_22_CSV_GENERAL.csv", sep = ";")
+
+## Procesamiento
+
+### Opciones Generales
+```{r opciones generales}
+options(scipen = 7)
+```
+
+### Curación de datos
+```{r conversion-fecha}
+covid$FECHA <- as.Date(covid$FECHA, format = "%d/%m/%Y")
+```
+
+## Salidas
+
+### Gráficos
+
+#### Casos acumulados
+
+##### Positivos
+
+```{r casos-positivos-acumulados}
+plot(
+  covid$FECHA,
+  covid$positivos,
+  type = "l",
+  xaxt = "n",
+  yaxt = "n",
+  main = "Casos acumulados posititivos de COVID-19 en Costa Rica",
+  xlab = "Fecha",
+  ylab = "Casos positivos"
+)
+
+# Formato del eje x
+axis(
+  side = 1,
+  covid$FECHA,
+  tick = FALSE,
+  format(covid$FECHA, "%m-%y"),
+  cex.axis = 0.7
+)
+
+axis(
+  side = 2,
+  covid$positivos,
+  labels = TRUE,  
+  at = seq(0, 1000000, by = 200000),
+  cex.axis = 0.7
+)
+```
+
+##### Fallecidos
+
+```{r Casos-fallecidos-acumulados}
+# Gráfico de líneas
+plot(
+  covid$FECHA,
+  covid$fallecidos,
+  type = "l",
+  xaxt = "n",
+  yaxt = "n",
+  main = "Casos acumulados fallecidos de COVID-19 en Costa Rica",
+  xlab = "Fecha",
+  ylab = "Casos fallecidos"
+)
+# Formato del eje X
+axis(side = 1,
+     covid$FECHA,
+     tick = FALSE,
+     format(covid$FECHA, "%m-%y"),
+     cex.axis = 0.7)
+# Formato del eje Y
+axis(
+  side = 2,
+  covid$fallecidos,
+  labels = TRUE,  
+  at = seq(0, 10000, by = 2000),
+  cex.axis = 0.7
+)
+```
+
+##### Otros
+
+```{r casos-otros-acumulados}
+plot(
+  covid$FECHA,
+  covid$positivos,
+  type = "l",
+  xaxt = "n",
+  yaxt = "n",
+  main = "Casos acumulados de COVID en Costa Rica",
+  xlab = "Fecha",
+  ylab = "Casos",
+  col = "blue"
+)
+
+# Casos activos
+lines(covid$FECHA, covid$activos, col="red")
+
+# Casos recuperados
+lines(covid$FECHA, covid$RECUPERADOS, col="green")
+
+# Casos fallecidos
+lines(covid$FECHA, covid$fallecidos, col="black")
+
+# Leyenda
+legend(
+  x = "topleft",
+  inset = 0.03,
+  legend = c("Positivos", "Activos", "Recuperados", "Fallecidos"),
+  col = c("blue", "red", "green", "black"),
+  lty = 1,
+  cex = 0.7)
+
+# Formato del eje X
+axis(side = 1,
+     covid$FECHA,
+     tick = FALSE,
+     format(covid$FECHA, "%m-%y"),
+     cex.axis = 0.7)
+
+# Formato del eje Y
+axis(
+  side = 2,
+  covid$positivos,
+  labels = TRUE,  
+  at = seq(0, 1000000, by = 200000),
+  cex.axis = 0.7
+)
+```
+
+
+#### Casos diarios
+
+##### Positivos
+
+```{r Casos positivos}
+barplot(
+  height=covid$nue_posi,
+  names.arg=format(covid$FECHA, "%Y"),
+  ann = FALSE, 
+  bty = "n", 
+  tck = 0, 
+  xaxt = "n",
+  space = 1,
+  main="Casos positivos por día",
+  xlab = "Fecha",
+  ylab = "Casos positivos",
+  col = "blue"
+)
+
+# Fechas minima y máxima
+x_min <- min(covid$FECHA)
+x_max <- max(covid$FECHA)
+
+# Formato del eje X
+axis(
+  side = 1,
+  at = match(seq(as.Date(x_min), x_max, "years"), covid$FECHA) * (1 + 1),
+  labels = format(seq(as.Date(x_min), x_max, "years"), "%Y"),
+  lwd = 0)
+```
+
+##### Fallecidos
+
+```{r Casos fallecidos}
+barplot(
+  height=covid$nue_falleci,
+  names.arg=format(covid$FECHA, "%Y"),
+  ann = FALSE, 
+  bty = "n", 
+  tck = 0, 
+  xaxt = "n",
+  space = 1,
+  main="Casos fallecidos por día",
+  xlab = "Fecha",
+  ylab = "Casos fallecidos",
+  col = "black"
+)
+
+# Fechas minima y máxima
+x_min <- min(covid$FECHA)
+x_max <- max(covid$FECHA)
+
+# Formato del eje X
+axis(
+  side = 1,
+  at = match(seq(as.Date(x_min), x_max, "years"), covid$FECHA) * (1 + 1),
+  labels = format(seq(as.Date(x_min), x_max, "years"), "%Y"),
+  lwd = 0)
+```
+
+##### Hospitalizados
+
+```{r casos-nuevos-hospitalizados}
+barplot(
+  height=covid$nue_hospi,
+  names.arg=format(covid$FECHA, "%Y"),
+  ann = FALSE, 
+  bty = "n", 
+  tck = 0, 
+  xaxt = "n",
+  space = 1,
+  main="Casos hozpitalizados por día",
+  xlab = "Fecha",
+  ylab = "Casos",
+  col = "black"
+)
+
+# Fechas minima y máxima
+x_min <- min(covid$FECHA)
+x_max <- max(covid$FECHA)
+
+# Formato del eje X
+axis(
+  side = 1,
+  at = match(seq(as.Date(x_min), x_max, "years"), covid$FECHA) * (1 + 1),
+  labels = format(seq(as.Date(x_min), x_max, "years"), "%Y"),
+  lwd = 0
+)
+```
+
+
+##### Hospitalizados en salón y UCI
+
+```{r casos-nuevos-salon-UCI}
+plot(
+covid$FECHA,
+covid$salon,
+type = "l",
+xaxt = "n",
+yaxt = "n",
+main = "Casos hospitalizados en salón y UCI por Covid en Costa Rica",
+xlab = "Fecha",
+ylab = "Casos",
+col = "green"
+)
+# Casos activos
+lines(covid$FECHA, covid$UCI, col="red")
+
+
+# Leyenda
+legend(
+x = "topleft",
+inset = 0.03,
+legend = c("En salon", "En UCI"),
+col = c("green", "red"),
+lty = 1,
+cex = 0.7)
+
+# Formato del eje X
+axis(side = 1,
+covid$FECHA,
+tick = FALSE,
+format(covid$FECHA, "%m-%y"),
+cex.axis = 0.7)
+
+# Formato del eje Y
+axis(
+side = 2,
+covid$UCI,
+labels = TRUE,
+at = seq(0, 1000, by = 100),
+cex.axis = .7
+)
+```
+
+
+##### Casos activos de menores, adultos y adultos mayores.
+
+```{r casos-menores-adultos-adultos-mayores}
+plot(
+covid$FECHA,
+covid$adul_acti,
+type = "l",
+xaxt = "n",
+yaxt = "n",
+main = "Casos menores, adultos y adultos mayores en Costa Rica",
+xlab = "Fecha",
+ylab = "Casos",
+col = "green"
+)
+# Casos adultos
+lines(covid$FECHA, covid$menor_acti, col="blue")
+# Casos de adultos mayores
+lines(covid$FECHA, covid$am_acti, col="red")
+
+# Leyenda
+legend(
+x = "topleft",
+inset = 0.03,
+legend = c("Adultos", "Menores", "Adultos Mayores"),
+col = c("green", "blue", "red"),
+lty = 1,
+cex = 0.7)
+
+# Formato del eje X
+axis(side = 1,
+covid$FECHA,
+tick = FALSE,
+format(covid$FECHA, "%m-%y"),
+cex.axis = .7)
+
+# Formato del eje Y
+axis(
+side = 2,
+covid$adul_acti,
+labels = TRUE,
+at = seq(0, 150000, by = 30000),
+cex.axis = .7
+)
+```
+
+
+
+
